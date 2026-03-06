@@ -52,16 +52,6 @@ try:
     # 使用PyCaret的load_model函数加载模型
     from pycaret.classification import load_model
     model = load_model('my_best_pipeline666')
-    st.success("Model loaded successfully!")
-    st.write(f"Model type: {type(model)}")
-    st.write(f"Model attributes: {[attr for attr in dir(model) if not attr.startswith('_')]}")
-    
-    # 检查是否有predict方法
-    if hasattr(model, 'predict'):
-        st.write("Model has predict method")
-    else:
-        st.write("Model does not have predict method")
-        
 except Exception as e:
     st.error(f"Error loading model: {str(e)}")
     st.write("Please make sure PyCaret is installed and the model file exists.")
@@ -168,20 +158,39 @@ if st.button('🔍 Start Prediction', key='predict_btn'):
         # 直接使用模型进行预测
         prediction = model.predict(input_df)
         
+        # 获取患病概率
+        if hasattr(model, 'predict_proba'):
+            probability = model.predict_proba(input_df)[0][1] * 100  # 获取第二类（患病）的概率
+        else:
+            probability = None
+        
         # 显示预测结果
         with st.container():
             st.subheader('📊 Prediction Result')
             with st.container():
-                st.markdown(
-                    f"""
-                    <div class="prediction-result">
-                        <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
-                        <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
-                        <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
-                    </div>
-                    """, 
-                    unsafe_allow_html=True
-                )
+                if probability is not None:
+                    st.markdown(
+                        f"""
+                        <div class="prediction-result">
+                            <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
+                            <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
+                            <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
+                            <p>Probability of Moderate-severe BPD: <strong>{probability:.2f}%</strong></p>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        f"""
+                        <div class="prediction-result">
+                            <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
+                            <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
+                            <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
+                        </div>
+                        """, 
+                        unsafe_allow_html=True
+                    )
                 
     except Exception as e:
         st.error(f"Error during prediction: {str(e)}")
