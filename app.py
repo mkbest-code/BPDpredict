@@ -44,8 +44,30 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # 1. 加载模型
-with open('my_best_pipeline666.pkl', 'rb') as f:
-    model = pickle.load(f)
+import numpy as np
+
+# 尝试加载模型
+model = None
+try:
+    with open('my_best_pipeline666.pkl', 'rb') as f:
+        model = pickle.load(f)
+    st.success("Model loaded successfully!")
+    st.write(f"Model type: {type(model)}")
+    st.write(f"Model attributes: {[attr for attr in dir(model) if not attr.startswith('_')]}")
+    
+    # 检查是否有predict方法
+    if hasattr(model, 'predict'):
+        st.write("Model has predict method")
+    else:
+        st.write("Model does not have predict method")
+        
+    # 检查是否是numpy数组
+    if isinstance(model, np.ndarray):
+        st.write(f"Model is a numpy array with shape: {model.shape}")
+        st.write("Warning: Model is a numpy array, not a trained model object")
+        
+except Exception as e:
+    st.error(f"Error loading model: {str(e)}")
 
 # 2. 设置网页标题和副标题
 st.title('👶 Neonatal Health Prediction System')
@@ -130,37 +152,42 @@ with st.container():
 # 4. 预测逻辑
 st.write('---')
 if st.button('🔍 Start Prediction', key='predict_btn'):
-    # 按照模型训练时的特征顺序组织输入数据
-    input_data = [
-        gestational_age, 
-        birth_weight, 
-        head_circumference, 
-        chest_circumference, 
-        apgar_1min, 
-        rds, 
-        invasive_ventilation, 
-        non_invasive_ventilation
-    ]
-    
-    # 调整为模型需要的格式
-    input_data = [input_data]
-    
-    prediction = model.predict(input_data)
-    
-    # 显示预测结果
-    with st.container():
-        st.subheader('📊 Prediction Result')
+    try:
+        # 按照模型训练时的特征顺序组织输入数据
+        input_data = {
+            'Gestational age': [gestational_age], 
+            'Birthweight-kg': [birth_weight], 
+            'Head circumference-cm': [head_circumference], 
+            'Chest circumference-cm': [chest_circumference], 
+            'Apgar 1 min': [apgar_1min], 
+            'RDS': [rds], 
+            'Invasive mechanical ventilation': [invasive_ventilation], 
+            'Non-invasive mechanical ventilation': [non_invasive_ventilation]
+        }
+        
+        # 转换为DataFrame格式
+        input_df = pd.DataFrame(input_data)
+        
+        # 预测
+        prediction = model.predict(input_df)
+        
+        # 显示预测结果
         with st.container():
-            st.markdown(
-                f"""
-                <div class="prediction-result">
-                    <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
-                    <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
-                    <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
-                </div>
-                """, 
-                unsafe_allow_html=True
-            )
+            st.subheader('📊 Prediction Result')
+            with st.container():
+                st.markdown(
+                    f"""
+                    <div class="prediction-result">
+                        <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
+                        <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
+                        <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
+                    </div>
+                    """, 
+                    unsafe_allow_html=True
+                )
+    except Exception as e:
+        st.error(f"Error during prediction: {str(e)}")
+        st.write("Please check the input values and try again.")
 
 # 5. 信息部分
 st.write('---')
