@@ -49,8 +49,9 @@ import numpy as np
 # 尝试加载模型
 model = None
 try:
-    with open('my_best_pipeline666.pkl', 'rb') as f:
-        model = pickle.load(f)
+    # 使用PyCaret的load_model函数加载模型
+    from pycaret.classification import load_model
+    model = load_model('my_best_pipeline666')
     st.success("Model loaded successfully!")
     st.write(f"Model type: {type(model)}")
     st.write(f"Model attributes: {[attr for attr in dir(model) if not attr.startswith('_')]}")
@@ -61,13 +62,9 @@ try:
     else:
         st.write("Model does not have predict method")
         
-    # 检查是否是numpy数组
-    if isinstance(model, np.ndarray):
-        st.write(f"Model is a numpy array with shape: {model.shape}")
-        st.write("Warning: Model is a numpy array, not a trained model object")
-        
 except Exception as e:
     st.error(f"Error loading model: {str(e)}")
+    st.write("Please make sure PyCaret is installed and the model file exists.")
 
 # 2. 设置网页标题和副标题
 st.title('👶 Neonatal Health Prediction System')
@@ -168,7 +165,7 @@ if st.button('🔍 Start Prediction', key='predict_btn'):
         # 转换为DataFrame格式
         input_df = pd.DataFrame(input_data)
         
-        # 预测
+        # 直接使用模型进行预测
         prediction = model.predict(input_df)
         
         # 显示预测结果
@@ -185,9 +182,11 @@ if st.button('🔍 Start Prediction', key='predict_btn'):
                     """, 
                     unsafe_allow_html=True
                 )
+                
     except Exception as e:
         st.error(f"Error during prediction: {str(e)}")
         st.write("Please check the input values and try again.")
+        st.write(f"Error details: {type(e).__name__}: {str(e)}")
 
 # 5. 信息部分
 st.write('---')
