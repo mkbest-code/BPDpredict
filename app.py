@@ -172,10 +172,9 @@ if st.button('🔍 Start Prediction', key='predict_btn'):
                     st.markdown(
                         f"""
                         <div class="prediction-result">
-                            <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
-                            <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
-                            <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
-                            <p>Probability of Moderate-severe BPD: <strong>{probability:.2f}%</strong></p>
+                            <h4>Probability of Moderate-severe BPD: <strong>{probability:.2f}%</strong></h4>
+                            <p>Based on the input newborn information, the system calculates the probability of Moderate-severe BPD as:
+                            <strong>{probability:.2f}%</strong></p>
                         </div>
                         """, 
                         unsafe_allow_html=True
@@ -184,8 +183,8 @@ if st.button('🔍 Start Prediction', key='predict_btn'):
                     st.markdown(
                         f"""
                         <div class="prediction-result">
-                            <h4>Prediction Result: <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></h4>
-                            <p>Based on the input newborn information, the system predicts the newborn\'s health risk level as:
+                            <h4>Prediction Result</h4>
+                            <p>Based on the input newborn information, the system predicts:
                             <strong>{'High Risk' if prediction[0] == 1 else 'Low Risk'}</strong></p>
                         </div>
                         """, 
